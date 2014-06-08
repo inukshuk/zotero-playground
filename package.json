@@ -1,0 +1,29 @@
+{
+  "name": "zotero",
+  "version": "0.0.0",
+  "description": "",
+  "main": "zotero.js",
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/inukshuk/zotero-playground.git"
+  },
+  "keywords": [
+    "zotero"
+  ],
+  "author": "Sylvester Keil",
+  "license": "AGPL",
+  "bugs": {
+    "url": "https://github.com/inukshuk/zotero-playground/issues"
+  },
+  "homepage": "https://github.com/inukshuk/zotero-playground",
+  "dependencies": {
+    "request": "*",
+    "underscore": "*"
+  },
+  "devDependencies": {
+    "make-lint": "*"
+  }
+}

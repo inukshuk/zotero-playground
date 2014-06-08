@@ -1,7 +1,7 @@
 require 'faraday'
 
 class Zotero
-  
+
   attr_reader :options
 
   def initialize(options = {})
