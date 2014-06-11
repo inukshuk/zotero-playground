@@ -41,7 +41,7 @@ Object.defineProperty(Zotero.prototype, 'prefix', {
 			return '/groups/' + this.defaults.group;
 		}
 
-		return '/';
+		return '';
 	}
 });
 
@@ -49,7 +49,7 @@ Zotero.prototype.url = function (path, params) {
   var library = url.resolve(this.defaults.url, this.prefix);
 	params = extend({}, this.defaults.params, params || {});
 
-	return url.resolve(library, path) + this.querystring(params);
+	return [library, path].join('/') + this.querystring(params);
 };
 
 Zotero.prototype.querystring = function (params) {
