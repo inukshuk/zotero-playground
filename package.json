@@ -1,6 +1,6 @@
 {
   "name": "zotero",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "zotero.js",
   "scripts": {
@@ -20,8 +20,8 @@
   },
   "homepage": "https://github.com/inukshuk/zotero-playground",
   "dependencies": {
-    "request": "*",
-    "underscore": "*"
+	"debug": "~1.0.2",
+    "request": "*"
   },
   "devDependencies": {
     "make-lint": "*"

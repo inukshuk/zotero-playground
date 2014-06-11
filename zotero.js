@@ -1,9 +1,14 @@
+var EventEmitter = require('events').EventEmitter;
 var request = require('request');
+var debug = require('debug')('zotero');
+var utils = require('./utils');
+var extend = utils.extend;
 var url = require('url');
-var us = require('underscore');
+
 
 function Zotero(defaults) {
-  this.defaults = us.extend({}, Zotero.defaults, defaults);
+	// Use merge instead
+  this.defaults = extend({}, Zotero.defaults, defaults);
 }
 
 Zotero.defaults = {
@@ -15,31 +20,54 @@ Zotero.defaults = {
   }
 };
 
-Zotero.debug = function (err, response, body) {
-  if (err) {
-    console.log('Zotero call failed: ', err);
+Zotero.debug = function (error, response, body) {
+  if (error) {
+    debug('API error: %s', error);
 
   } else {
-    console.dir(response, body);
+    debug('API response:\n%s\n', body);
   }
 };
 
-Zotero.prototype.get = function (path, params, callback) {
+Zotero.prototype = new EventEmitter();
+
+Object.defineProperty(Zotero.prototype, 'prefix', {
+	get: function () {
+		if (this.defaults.user != null) {
+			return '/users/' + this.defaults.user;
+		}
+
+		if (this.defaults.group != null) {
+			return '/groups/' + this.defaults.group;
+		}
+
+		return '/';
+	}
+});
+
+Zotero.prototype.url = function (path, params) {
+  var library = url.resolve(this.defaults.url, this.prefix);
+	params = extend({}, this.defaults.params, params || {});
+
+	return url.resolve(library, path) + this.querystring(params);
+};
+
+Zotero.prototype.querystring = function (params) {
+	return url.format({ query: params });
+};
+
+Zotero.prototype.read = function (path, params, callback) {
   if (typeof params === 'function') {
     callback = params; params = null;
   }
 
-  var options = us.extend({}, this.defaults);
-  params = us.extend({}, options.params, params || {});
+  request({
+		url: this.url(path, params),
+		headers: this.defaults.headers
 
-  delete options.params;
-
-  options.url = url.resolve(options.url, path) +
-    url.format({ query: params });
-
-  request(options, callback);
+	}, callback);
 
   return this;
 };
 
-module.exports = Zotero;
+exports = module.exports = Zotero;
