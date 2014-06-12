@@ -3,16 +3,28 @@ var request = require('request');
 var debug = require('debug')('zotero');
 var utils = require('./utils');
 var extend = utils.extend;
+var join = require('path').join;
+var qs = require('querystring');
 var url = require('url');
 
 
-function Zotero(defaults) {
-	// Use merge instead
-  this.defaults = extend({}, Zotero.defaults, defaults);
+function Zotero(options) {
+  this.options = extend({}, Zotero.defaults, options);
 }
 
+function property(name, definition) {
+	return Object.defineProperty(Zotero.prototype, name, defintion);
+}
+
+function reader(name, reader) {
+	return property(name, { get: reader });
+}
+
+Zotero.prototype = new EventEmitter();
+
+
 Zotero.defaults = {
-  url: 'https://api.zotero.org',
+  api: 'https://api.zotero.org',
   params: {},
   headers: {
     'Zotero-API-Version': '2',
@@ -29,32 +41,38 @@ Zotero.debug = function (error, response, body) {
   }
 };
 
-Zotero.prototype = new EventEmitter();
 
-Object.defineProperty(Zotero.prototype, 'prefix', {
-	get: function () {
-		if (this.defaults.user != null) {
-			return '/users/' + this.defaults.user;
-		}
-
-		if (this.defaults.group != null) {
-			return '/groups/' + this.defaults.group;
-		}
-
-		return '';
+reader('prefix', function () {
+	if (this.options.user != null) {
+		return '/users/' + this.options.user;
 	}
+
+	if (this.options.group != null) {
+		return '/groups/' + this.options.group;
+	}
+
+	return '';
 });
 
+property('api', {
+	get: function () { return this.options.api; },
+	set: function (api) { this.options.api = api; },
+	writable: true
+});
+
+reader('base', function () {
+	return join(this.api, this.prefix);
+});
+
+
 Zotero.prototype.url = function (path, params) {
-  var library = url.resolve(this.defaults.url, this.prefix);
-	params = extend({}, this.defaults.params, params || {});
-
-	return [library, path].join('/') + this.querystring(params);
+	return join(this.base, path) + this.stringify(params);
 };
 
-Zotero.prototype.querystring = function (params) {
-	return url.format({ query: params });
-};
+Zotero.prototype.stringify = function (params) {
+	return qs.stringify(extend({}, this.options.params, params));
+}
+
 
 Zotero.prototype.read = function (path, params, callback) {
   if (typeof params === 'function') {
