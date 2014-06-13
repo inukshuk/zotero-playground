@@ -13,7 +13,7 @@ function Zotero(options) {
 }
 
 function property(name, definition) {
-	return Object.defineProperty(Zotero.prototype, name, defintion);
+	return Object.defineProperty(Zotero.prototype, name, definition);
 }
 
 function reader(name, reader) {
@@ -56,8 +56,7 @@ reader('prefix', function () {
 
 property('api', {
 	get: function () { return this.options.api; },
-	set: function (api) { this.options.api = api; },
-	writable: true
+	set: function (api) { this.options.api = api; }
 });
 
 reader('base', function () {
