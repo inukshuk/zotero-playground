@@ -26,6 +26,7 @@
   "devDependencies": {
     "make-lint": "*",
     "mocha": "~1.20.1",
+    "sinon": "*",
     "expect.js": "*"
   }
 }
