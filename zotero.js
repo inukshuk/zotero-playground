@@ -10,7 +10,25 @@ var url = require('url');
 
 function Zotero(options) {
   this.options = extend({}, Zotero.defaults, options);
+
+	this.proxy({
+		items: {
+				terminal: ['top', 'trash'],
+				postfix: ['children', 'tags']
+		}
+	});
 }
+
+
+Zotero.prototype.proxy = function (options) {
+	for (var name, config in options) {
+		options[name] = { value: proxy(this, name, config) };
+	}
+
+	Object.defineProperties(this, options);
+
+	return this;
+};
 
 function property(name, definition) {
 	return Object.defineProperty(Zotero.prototype, name, definition);
@@ -56,8 +74,7 @@ reader('prefix', function () {
 
 property('api', {
 	get: function () { return this.options.api; },
-	set: function (api) { this.options.api = api; },
-	writable: true
+	set: function (api) { this.options.api = api; }
 });
 
 reader('base', function () {
@@ -74,7 +91,7 @@ Zotero.prototype.stringify = function (params) {
 }
 
 
-Zotero.prototype.read = function (path, params, callback) {
+Zotero.prototype.get = function (path, params, callback) {
   if (typeof params === 'function') {
     callback = params; params = null;
   }
@@ -87,5 +104,36 @@ Zotero.prototype.read = function (path, params, callback) {
 
   return this;
 };
+
+
+function proxy(z, prefix, ext) {
+	var i, ii, name;
+
+	function p(path, params, cb) {
+		return z.get(join(prefix, path), params, cb);
+	};
+
+	if (ext.terminal) {
+		for (i = 0, ii = ext.terminal.length; i < ii; ++i) {
+			name = ext.terminal[i];
+
+			p[name] = function (params, cb) {
+				return this(name, params, cb);
+			};
+		}
+	}
+
+	if (ext.postfix) {
+		for (i = 0, ii = ext.postfix.length; i < ii; ++i) {
+			name = ext.postfix[i];
+
+			p[name] = function (prefix, params, cb) {
+				return this(join(prefix, name), params, cb);
+			};
+		}
+	}
+
+	return p;
+}
 
 exports = module.exports = Zotero;
