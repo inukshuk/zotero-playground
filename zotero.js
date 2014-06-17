@@ -13,7 +13,7 @@ function Zotero(options) {
 }
 
 function property(name, definition) {
-	return Object.defineProperty(Zotero.prototype, name, defintion);
+	return Object.defineProperty(Zotero.prototype, name, definition);
 }
 
 function reader(name, reader) {
@@ -81,7 +81,7 @@ Zotero.prototype.read = function (path, params, callback) {
 
   request({
 		url: this.url(path, params),
-		headers: this.defaults.headers
+		headers: this.options.headers
 
 	}, callback);
 
